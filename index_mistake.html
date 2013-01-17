@@ -1,0 +1,93 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Three.js Cubes</title>
+	<script src="js/three.min.js"></script>
+	<script src="js/Stats.js"></script>
+	<script>
+
+		var image; // テクスチャ用画像
+		var STAGE_W = 960, STAGE_H = 540; // 画面サイズ
+		var camera, scene, renderer; // 3D関係
+		var CELL_NUM = 12;
+
+		function init() {
+			image = new Image();
+			image.onload = competeHandler;
+			image.src = "imgs/image.png";
+		}
+
+		function competeHandler() {
+			init3D();
+			initModel();
+			setInterval(tick, 1000 / 60);
+		}
+
+		function init3D(){
+			// 3D空間を作成
+			scene = new THREE.Scene();
+
+			// カメラを作成
+			camera = new THREE.PerspectiveCamera(60, STAGE_W / STAGE_H, 1, 2000);
+			camera.position.z = -800;
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			scene.add(camera);
+
+			// レンダラーを作成
+			renderer = new THREE.WebGLRenderer({antialias:0});
+			renderer.setSize(STAGE_W, STAGE_H);
+
+			// エレメントを追加
+			document.getElementById('container').appendChild(renderer.domElement);
+			
+			stats = new Stats();
+			document.getElementById("statsContainer").appendChild(stats.getDomElement());
+		}
+
+		function initModel(){
+			
+			container = new THREE.Object3D();
+			scene.add(container);
+			
+			var texture  = new THREE.ImageUtils.loadTexture('imgs/image.png');
+			var material = new THREE.MeshBasicMaterial({map:texture});
+			
+			// Box
+			for (var i = 0; i < CELL_NUM; i++)
+			{
+				for (var j = 0; j < CELL_NUM; j++)
+				{
+					for (var k = 0; k < CELL_NUM; k++)
+					{
+						var geometry = new THREE.CubeGeometry(30, 30, 30, 1, 1, 1);
+						var mesh = new THREE.Mesh(geometry, material);
+						//var mesh = meshBase.clone();
+					
+						mesh.position.x = 50 * (i - CELL_NUM / 2);
+						mesh.position.y = 50 * (j - CELL_NUM / 2);
+						mesh.position.z = 50 * (k - CELL_NUM / 2);
+						
+						container.add(mesh);
+					}
+				}
+			}
+		}
+
+		function tick(){
+			container.rotation.x +=  Math.PI / 180;
+			container.rotation.y += Math.PI / 180;
+
+			// レンダリング
+			renderer.render(scene, camera);
+			
+			stats.update();
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div id="container" style="background:#000; width:960px; height:540px;"></div>
+	<div id="statsContainer" style="position: absolute; top:10px; left:10px;"></div>
+	<p>You need a web browser that supports WebGL. (ex. Google Chrome)</p>
+</body>
+</html>

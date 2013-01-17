@@ -1,0 +1,92 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Three.js Cubes</title>
+	<script src="js/three.min.js"></script>
+	<script src="js/Stats.js"></script>
+	<script>
+
+		var STAGE_W = 960, STAGE_H = 540; // 画面サイズ
+		var camera, scene, renderer; // 3D関係
+		var CELL_NUM = 15; // 1辺あたりに配置するオブジェクトの個数
+
+		function init() {
+			init3D();
+			initModel();
+			requestAnimationFrame(tick);
+		}
+
+		function init3D(){
+			// 3D空間を作成
+			scene = new THREE.Scene();
+
+			// カメラを作成
+			camera = new THREE.PerspectiveCamera(60, STAGE_W / STAGE_H, 1, 2000);
+			camera.position.z = -1000;
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			scene.add(camera);
+
+			// レンダラーを作成
+			renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize(STAGE_W, STAGE_H);
+			renderer.sortObjects = true;
+
+			// エレメントを追加
+			document.getElementById('container').appendChild(renderer.domElement);
+			
+			stats = new Stats();
+			document.getElementById("statsContainer").appendChild(stats.getDomElement());
+		}
+
+		function initModel(){
+			
+			container = new THREE.Object3D();
+			scene.add(container);
+			
+			var texture  = new THREE.ImageUtils.loadTexture('imgs/image.png');
+			var geometry = new THREE.CubeGeometry(50, 50, 50, 1, 1, 1);
+			
+			// Box
+			for (var i = 0; i < CELL_NUM; i++)
+			{
+				for (var j = 0; j < CELL_NUM; j++)
+				{
+					for (var k = 0; k < CELL_NUM; k++)
+					{	
+						var rnd_color = '#'+Math.floor(Math.random()*16777215).toString(16);						
+						var material = new THREE.MeshBasicMaterial({color : rnd_color, map:texture, transparent: true, opacity: 0.1});
+						var meshItem = new THREE.Mesh(geometry, material);
+						
+						meshItem.position.x = 51 * (i - CELL_NUM / 2);
+						meshItem.position.y = 51 * (j - CELL_NUM / 2);
+						meshItem.position.z = 51 * (k - CELL_NUM / 2);
+
+						//THREE.GeometryUtils.merge(geometry, meshItem);
+						container.add(meshItem);
+					}
+				}
+			}
+			//var mesh = new THREE.Mesh(geometry, material);
+			//container.add(mesh);
+		}
+
+		function tick(){
+			container.rotation.x +=  Math.PI / 180;
+			container.rotation.y += Math.PI / 180;
+
+			// レンダリング
+			renderer.render(scene, camera);
+			
+			stats.update();
+
+			requestAnimationFrame(tick);
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div id="container" style="background:#000; width:960px; height:540px;"></div>
+	<div id="statsContainer" style="position: absolute; top:10px; left:10px;"></div>
+	<p>You need a web browser that supports WebGL. (ex. Google Chrome)</p>
+</body>
+</html>
